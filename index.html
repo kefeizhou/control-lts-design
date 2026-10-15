@@ -1,0 +1,488 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>LTS Web Control</title>
+  <link rel="icon" href="/favicon.ico" sizes="any" />
+  <link rel="icon" type="image/png" href="/LogoFavicon.png" />
+
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    @media (max-width: 450px) {
+      #browserNotSupportedOverlay .not-sup-desc {
+        font-size: 1.15rem !important;
+      }
+      #browserNotSupportedOverlay .not-sup-actions {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        width: max-content !important;
+        max-width: 100% !important;
+        margin-left: auto !important;
+        margin-right: auto !important;
+      }
+      #browserNotSupportedOverlay .not-sup-actions > a,
+      #browserNotSupportedOverlay .not-sup-actions > button {
+        width: 100% !important;
+      }
+      /* On narrow screens: show Download button first, then Have A Look */
+      #browserNotSupportedOverlay .not-sup-actions > a {
+        order: 1;
+      }
+      #browserNotSupportedOverlay .not-sup-actions > button {
+        order: 2;
+      }
+      /* On narrow screens: show only "Not Supported" */
+      #browserNotSupportedOverlay .not-sup-title-browser {
+        display: none;
+      }
+      #browserNotSupportedOverlay .not-sup-title-main {
+        display: inline;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="pageRoot" style="position:relative;">
+    <div id="pageFadeOverlay" style="position:fixed; inset:0; background:rgb(var(--bg)); z-index:9999; opacity:1; transition:opacity 0.35s ease-out;"></div>
+    <div id="browserNotSupportedOverlay" style="position:fixed; inset:0; background:rgb(var(--bg) / 0.96); z-index:9998; display:none; opacity:1; transition:opacity 0.35s ease-out; flex-direction:column; align-items:center; justify-content:flex-start; text-align:center; box-sizing:border-box; padding:18px 35px 28px 35px; overflow:auto; -webkit-overflow-scrolling:touch;">
+      <div style="max-width:560px; width:100%; margin-top:auto; margin-bottom:auto;">
+        <img src="Logo.png" alt="Not supported" style="width:86px; height:86px; margin:0 auto 22px auto; display:block;" />
+        <h1 style="margin:0 0 12px 0;"><span class="not-sup-title-browser">Browser</span> <span class="not-sup-title-main">Not Supported</span></h1>
+        <div class="not-sup-desc" style="font-size:1.2rem; line-height:1.35; color:rgb(var(--text)); opacity:0.65; max-width:480px; margin:0 auto;">
+          To connect to your Respooler, use a compatible browser like Chrome or Edge on desktop and Android. You can also download the app for iOS.
+        </div>
+        <div class="not-sup-actions" style="display:flex; flex-direction:row; gap:12px; margin-top:22px; align-items:center; justify-content:center; width:100%; flex-wrap:wrap;">
+          <button id="notSupHaveLookBtn" class="lts-btn" type="button" style="width:auto; padding:10px 20px; height:auto; min-height:0; line-height:1.2;">Have A Look</button>
+          <a class="lts-btn" href="https://apps.apple.com/app/lts-control/id6742149969" target="_blank" rel="noopener" style="width:auto; padding:10px 20px; height:auto; min-height:0; line-height:1.2; text-decoration:none; background:#0E7AFE; border-color:#0E7AFE; color:#fff;">Download iOS App</a>
+        </div>
+      </div>
+    </div>
+
+  <div class="page-content">
+
+    <div class="header">
+      <div class="header-logo">
+        <picture>
+          <source srcset="Control-Logo-dark.png" media="(prefers-color-scheme: dark)" />
+          <img src="Control-Logo.png" alt="Control Logo" />
+        </picture>
+      </div>
+      <div class="header-text">
+        <h1>LTS Web Control</h1>
+      </div>
+    </div>
+
+    <div class="cards-row">
+
+      <div class="card-stack">
+
+        <!-- TOP STATUS PILLS (UI only) -->
+        <div class="status-pills" aria-label="Status">
+          <div class="status-pill">
+            <img id="pillConnIcon" src="antenna-slash.png" alt="Connection" width="30" height="30" style="flex:0 0 30px;">
+            <div class="status-pill-text">
+              <div class="status-pill-title">Connection</div>
+              <div id="pillConnSub" class="status-pill-subtitle">Disconnected</div>
+            </div>
+          </div>
+
+          <div class="status-pill">
+            <img id="pillFilIcon" src="xmark.png" alt="Filament" width="30" height="30" style="flex:0 0 30px;">
+            <div class="status-pill-text">
+              <div class="status-pill-title">Filament</div>
+              <div id="pillFilSub" class="status-pill-subtitle">Not Detected</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- INFO CARD (left column, fills available height) -->
+        <div class="card info-card" aria-label="Control image">
+          <div class="info-frame" aria-hidden="true">
+            <button id="infoVariantBtn" class="info-variant-btn" type="button" aria-label="Change Respooler variant">
+              <picture>
+                <source srcset="arrows-circle-dark.png" media="(prefers-color-scheme: dark)" />
+                <img src="arrows-circle.png" alt="" width="18" height="18" />
+              </picture>
+            </button>
+            <div class="info-frame-img"></div>
+            <div class="info-frame-cap" aria-label="Respooler version">
+              <span id="infoRespooler">—</span>
+            </div>
+          </div>
+
+          <div class="info-meta" aria-label="Board info">
+            <div class="info-meta-row">
+              <div class="info-meta-label">Board version</div>
+              <div id="infoBoard" class="info-meta-value">—</div>
+            </div>
+            <div class="info-meta-row">
+              <div class="info-meta-label">Board firmware</div>
+              <div id="infoFw" class="info-meta-value" style="min-width:0;">—</div>
+            </div>
+            <div class="info-meta-row">
+              <div class="info-meta-label">Wi‑Fi status</div>
+              <div id="infoWifi" class="info-meta-value" style="min-width:0;">—</div>
+            </div>
+          </div>
+
+          <div id="wbConnectWrap" class="info-card-footer" style="display:none;">
+            <div class="info-card-footer-row">
+              <button id="wbConnect" class="lts-btn info-connect-btn" type="button">Connect Respooler</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- CONTROL CARD (Block A) -->
+        <div class="card control-card">
+          <section id="lts-control" class="section-base section-control">
+
+            <div class="wb-topline">
+              <span id="wbProgPct" style="justify-self:start;">0 %</span>
+              <span id="wbStatusText" style="justify-self:center;">Not connected</span>
+              <span id="wbProgRem" style="justify-self:end;">-00:00</span>
+            </div>
+            <div id="wbProg">
+              <div id="wbProgBar"></div>
+            </div>
+            <div id="wbButtonGroup" style="display:none">
+              <div class="lts-actions" style="display:flex;flex-wrap:nowrap;gap:12px;width:100%;align-items:stretch;margin:16px 0 0 0;">
+                <button id="wbStart" class="lts-btn" style="flex:1 0 0;min-width:0;max-width:none;width:100%;" disabled>Start</button>
+                <button id="wbStop"  class="lts-btn" style="flex:1 0 0;min-width:0;max-width:none;width:100%;" disabled>Stop</button>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <!-- SPEED CARD -->
+        <div class="card pill-card speed-card">
+          <section id="lts-speed" class="section-base">
+            <div style="display:grid; grid-template-columns:max-content 1fr max-content; align-items:center; column-gap:12px; width:100%; margin:0;">
+              <label for="speed">Speed:</label>
+              <input id="speed" type="range" min="50" max="100" step="1" value="85" style="width:100%;">
+              <span id="speedVal" style="display:inline-block; width:6ch; text-align:right;">85 %</span>
+            </div>
+          </section>
+        </div>
+
+      </div>
+
+      <div class="card-stack">
+
+        <!-- SETTINGS CARD (Block B) -->
+        <div class="card">
+          <section id="lts-settings" class="section-base pos-rel">
+
+            <div class="form-grid">
+              <label for="led" class="form-label">LED Brightness:</label>
+              <input id="led" class="form-control" type="range" min="0" max="100" step="10" value="50" style="width:min(160px, 100%); margin-top:2px;">
+            </div>
+
+            <div class="form-grid" style="margin-top:8px;">
+              <label for="wgt" class="form-label">Transfer Amount:</label>
+              <select id="wgt" class="form-control" style="width:min(135px, 100%); border:1px solid #d1d5db; color:#000;">
+                <option value="0">Entire Spool</option>
+                <option value="1">1.0 kg</option>
+                <option value="2">0.5 kg</option>
+                <option value="3">0.25 kg</option>
+              </select>
+            </div>
+
+            <div class="form-grid" style="margin-top:5px;">
+              <div></div>
+              <label class="form-control"><input id="useFil" type="checkbox" checked> Use Filament Sensor</label>
+            </div>
+
+            <div class="form-grid" style="margin-top:8px;">
+              <label for="jin" class="form-label">Completion Sound:</label>
+              <select id="jin" class="form-control" style="width:min(110px, 100%); border:1px solid #d1d5db; color:#000;">
+                <option value="0">Off</option>
+                <option value="1">Simple</option>
+                <option value="2">Glissando</option>
+                <option value="3">Star Wars</option>
+              </select>
+            </div>
+
+            <hr class="section-divider" style="margin:12px 0;">
+
+            <!-- Servo (PRO boards) -->
+            <div id="servoSettingsGroup" class="servo-settings-group" aria-disabled="true">
+              <div class="servo-settings-overlay" aria-hidden="true"></div>
+              <div class="form-grid" style="margin-top:8px;">
+                <label class="form-label">Servo Calibration:</label>
+                <button id="servoCalBtn" class="mini-btn compact form-control">
+                  Calibrate
+                  <span class="btn-chevron" aria-hidden="true">
+                    <svg viewBox="0 0 16 16" focusable="false" aria-hidden="true">
+                      <path d="M6 3.25L10.5 8 6 12.75" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                  </span>
+                </button>
+              </div>
+
+              <div class="form-grid" style="margin-top:8px;">
+                <label class="form-label">Step Distance:</label>
+                <div class="stepper form-control">
+                  <div class="stepper-seg" role="group" aria-label="Step distance controls">
+                    <button id="servoStepMinus" class="stepper-seg-btn" type="button" aria-label="Decrease step distance"><span class="stepper-glyph" style="display:flex;align-items:center;justify-content:center;height:100%;"><svg viewBox="0 0 16 16" aria-hidden="true" focusable="false" style="width:14px;height:14px;display:block;"><path d="M3 8h10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg></span></button>
+                    <div class="stepper-seg-divider" aria-hidden="true"></div>
+                    <button id="servoStepPlus" class="stepper-seg-btn" type="button" aria-label="Increase step distance"><span class="stepper-glyph" style="display:flex;align-items:center;justify-content:center;height:100%;"><svg viewBox="0 0 16 16" aria-hidden="true" focusable="false" style="width:14px;height:14px;display:block;"><path d="M8 3v10M3 8h10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg></span></button>
+                  </div>
+                  <span id="servoStepVal" class="stepper-value">1.75 mm</span>
+                </div>
+              </div>
+
+              <div class="form-grid" style="margin-top:8px;">
+                <label for="servoHomeSetting" class="form-label">Home Position:</label>
+                <select id="servoHomeSetting" class="form-control" style="width:min(110px, 100%); border:1px solid #d1d5db; color:#000;">
+                  <option value="R">Right</option>
+                  <option value="L">Left</option>
+                </select>
+              </div>
+            </div>
+
+            <hr class="section-divider" style="margin:12px 0;">
+
+            <div class="form-grid" style="margin-top:8px;">
+              <label for="motor" class="form-label">Motor Strength:</label>
+              <div class="stepper form-control">
+                <div class="stepper-seg" role="group" aria-label="Motor strength controls">
+                  <button id="motorMinus" class="stepper-seg-btn" type="button" aria-label="Decrease motor strength"><span class="stepper-glyph" style="display:flex;align-items:center;justify-content:center;height:100%;"><svg viewBox="0 0 16 16" aria-hidden="true" focusable="false" style="width:14px;height:14px;display:block;"><path d="M3 8h10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg></span></button>
+                  <div class="stepper-seg-divider" aria-hidden="true"></div>
+                  <button id="motorPlus" class="stepper-seg-btn" type="button" aria-label="Increase motor strength"><span class="stepper-glyph" style="display:flex;align-items:center;justify-content:center;height:100%;"><svg viewBox="0 0 16 16" aria-hidden="true" focusable="false" style="width:14px;height:14px;display:block;"><path d="M8 3v10M3 8h10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg></span></button>
+                </div>
+                <span id="motorVal" class="stepper-value">100 %</span>
+              </div>
+            </div>
+            <div class="form-grid" style="margin-top:0px;">
+              <div></div>
+              <label class="form-control"><input id="dir" type="checkbox"> Change Direction</label>
+            </div>
+            <div class="form-grid" style="margin-top:2px;">
+              <div></div>
+              <label class="form-control"><input id="hs" type="checkbox"> High-Speed</label>
+            </div>
+            <div class="form-grid" style="margin-top:8px;">
+              <label for="autoStop" class="form-label">Auto-Stop Sensitivity:</label>
+              <select id="autoStop" class="form-control" style="width:min(110px, 100%); border:1px solid #d1d5db; color:#000;">
+                <option value="0">Off</option>
+                <option value="1">Low</option>
+                <option value="2">Medium</option>
+                <option value="3">High</option>
+              </select>
+            </div>
+
+            <hr class="section-divider" style="margin:12px 0;">
+
+            <div class="form-grid" style="margin-top:8px;">
+              <label for="fan" class="form-label">Fan Speed:</label>
+              <input id="fan" class="form-control" type="range" min="10" max="100" step="10" value="60" style="width:min(160px, 100%); margin-top:2px;">
+            </div>
+            <div class="form-grid" style="margin-top:0px;">
+              <div></div>
+              <label class="form-control"><input id="fanAlways" type="checkbox"> Fan Always On</label>
+            </div>
+
+            <hr class="section-divider" style="margin:12px 0;">
+
+            <div class="form-grid" style="margin-top:8px;">
+              <label class="form-label">Reference Time:</label>
+              <div class="stepper form-control">
+                <div class="stepper-seg" role="group" aria-label="Reference time controls">
+                  <button id="durMinus" class="stepper-seg-btn" type="button" aria-label="Decrease reference time"><span class="stepper-glyph" style="display:flex;align-items:center;justify-content:center;height:100%;"><svg viewBox="0 0 16 16" aria-hidden="true" focusable="false" style="width:14px;height:14px;display:block;"><path d="M3 8h10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg></span></button>
+                  <div class="stepper-seg-divider" aria-hidden="true"></div>
+                  <button id="durPlus" class="stepper-seg-btn" type="button" aria-label="Increase reference time"><span class="stepper-glyph" style="display:flex;align-items:center;justify-content:center;height:100%;"><svg viewBox="0 0 16 16" aria-hidden="true" focusable="false" style="width:14px;height:14px;display:block;"><path d="M8 3v10M3 8h10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg></span></button>
+                </div>
+                <span id="durVal" class="stepper-value">00m 00s</span>
+              </div>
+            </div>
+          </section>
+        </div>
+
+      </div>
+
+    </div>
+
+    <div style="text-align:center; margin-top:2rem; margin-bottom:2rem; font-size:1rem; color:rgb(var(--text)); width:100%;">
+      Powered by <a href="https://developer.chrome.com/docs/capabilities/bluetooth" target="_blank" style="color:rgb(var(--text)); text-decoration:underline;">WebBluetooth</a>
+      <div style="margin-top:0.6rem;">
+        <a href="https://github.com/LukasT03" target="_blank" style="color:rgb(var(--text)); text-decoration:underline; margin-right:1rem;">GitHub</a>
+        <a href="https://lts-design.com" target="_blank" style="color:rgb(var(--text)); text-decoration:underline;">lts-design.com</a>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Update / WiFi modal -->
+  <div id="wifiModalBackdrop" class="modal-backdrop" role="dialog" aria-modal="true" aria-label="Update and Wi‑Fi">
+    <div class="modal">
+      <button id="wifiModalClose" class="icon-btn modal-close" type="button" aria-label="Close" style="padding-bottom:0; font-size:0; line-height:0;">
+        <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false" style="width:16px;height:16px;display:block;">
+          <path d="M4 4l8 8M12 4l-8 8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+      </button>
+      <div class="modal-header">
+        <h2 class="modal-title">Create Wi‑Fi Connection</h2>
+      </div>
+
+      <p class="wifi-desc">To establish a Wi-Fi connection, scan for available networks and enter the password. Only works with 2.4 GHz networks. <span id="wifiStatus">&nbsp;</span></p>
+      <hr class="section-divider" style="margin:12px 0;">
+
+      <section id="lts-update" class="section-base">
+
+        <div class="wifi-form-grid" style="display:grid; grid-template-columns:max-content 1fr; column-gap:0px; row-gap:10px; align-items:center; margin-top:10px;">
+          <label for="wifiSsid" class="form-label">Network:</label>
+          <div class="form-control" style="display:flex; align-items:center; gap:12px; width:100%;">
+            <select id="wifiSsid" class="form-control" style="flex:1 1 auto; width:100%; box-sizing:border-box; height:26px; min-height:26px; line-height:26px; border:1px solid #d1d5db; padding:0 0.6rem; color:#000;">
+              <option value="" selected>Select (0)</option>
+            </select>
+            <button id="wifiScanBtn" class="mini-btn compact" type="button" style="height:26px; min-height:26px; line-height:26px; padding:0 0.8rem;">Scan</button>
+          </div>
+
+          <label for="wifiPass" class="form-label">Password:</label>
+          <div class="form-control" style="display:flex; align-items:center; gap:12px; width:100%;">
+            <input id="wifiPass" class="form-control" type="password" autocomplete="current-password" placeholder="Wi-Fi password"
+                   style="flex:1 1 auto; width:100%; box-sizing:border-box; border:1px solid #d1d5db; padding:0.45rem 0.6rem;" />
+            <button class="mini-btn compact" type="button" aria-hidden="true" tabindex="-1" style="visibility:hidden;">Scan</button>
+          </div>
+
+          <div style="grid-column: 1 / -1; display:flex; flex-direction:column; align-items:stretch; gap:10px; width:100%; margin-top:8px;">
+            <button id="wifiSendBtn" class="lts-btn" type="button">Connect</button>
+          </div>
+        </div>
+
+      </section>
+    </div>
+  </div>
+
+  <!-- Respooler variant modal (only when Board sends VAR=UNK) -->
+  <div id="variantModalBackdrop" class="modal-backdrop" role="dialog" aria-modal="true" aria-label="Respooler variant">
+    <div class="modal">
+      <button id="variantModalClose" class="icon-btn modal-close" type="button" aria-label="Close" style="padding-bottom:0; font-size:0; line-height:0;">
+        <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false" style="width:16px;height:16px;display:block;">
+          <path d="M4 4l8 8M12 4l-8 8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+      </button>
+      <div class="modal-header">
+        <h2 class="modal-title">Select Respooler Variant</h2>
+      </div>
+
+      <p id="variantDesc" class="variant-desc">Your Board reported an unknown Respooler variant. Please select the correct one and press Save.</p>
+
+      <div class="variant-tiles" role="group" aria-label="Respooler variant">
+        <button id="variantV4" class="variant-tile" type="button" aria-pressed="false">
+          <img src="Respooler.png" alt="Respooler V4" />
+          <div class="variant-tile-label">Respooler V4</div>
+        </button>
+
+        <button id="variantPro" class="variant-tile" type="button" aria-pressed="false">
+          <img src="RespoolerPro.png" alt="Respooler Pro" />
+          <div class="variant-tile-label">Respooler Pro</div>
+        </button>
+      </div>
+
+      <div class="variant-actions" style="margin-top:16px;">
+        <button id="variantSaveBtn" class="lts-btn" type="button" disabled>Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Servo calibration modal -->
+  <div id="servoModalBackdrop" class="modal-backdrop" role="dialog" aria-modal="true" aria-label="Servo calibration">
+    <div class="modal">
+      <button id="servoModalClose" class="icon-btn modal-close" type="button" aria-label="Close" style="padding-bottom:0; font-size:0; line-height:0;">
+        <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false" style="width:16px;height:16px;display:block;">
+          <path d="M4 4l8 8M12 4l-8 8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+      </button>
+      <div class="modal-header">
+        <h2 class="modal-title">Calibrate End Positions</h2>
+      </div>
+
+      <p class="servo-desc">Adjust the left and right end stops so that the filament guide just touches the sides.</p>
+
+      <div class="cal-row">
+        <button id="servoArrowLeft" class="arrow-btn" type="button" aria-label="Decrease angle">
+          <span class="arrow-icon left" aria-hidden="true">
+            <svg viewBox="0 0 16 16" focusable="false" aria-hidden="true">
+              <path d="M6 3.25L10.5 8 6 12.75" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </span>
+        </button>
+
+        <div id="servoAngleText" class="angle-text">Angle: –°</div>
+
+        <button id="servoArrowRight" class="arrow-btn" type="button" aria-label="Increase angle">
+          <span class="arrow-icon right" aria-hidden="true">
+            <svg viewBox="0 0 16 16" focusable="false" aria-hidden="true">
+              <path d="M6 3.25L10.5 8 6 12.75" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </span>
+        </button>
+      </div>
+
+      <hr class="section-divider" style="margin:12px 0;">
+
+      <div id="servoSideSegment" class="segmented" role="tablist" aria-label="Calibration side">
+        <div id="servoSideIndicator" class="seg-indicator"></div>
+        <button id="servoSideL" class="seg-btn is-selected" type="button" role="tab" aria-selected="true">Left Side</button>
+        <button id="servoSideR" class="seg-btn" type="button" role="tab" aria-selected="false">Right Side</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    window.addEventListener("load", () => {
+      // Show a blocking overlay when the browser cannot use WebBluetooth.
+      try {
+        const notSup = document.getElementById("browserNotSupportedOverlay");
+        const haveLook = document.getElementById("notSupHaveLookBtn");
+        const setNoScroll = (on) => {
+          try {
+            // Simple: lock the page behind the overlay; the overlay itself can still scroll.
+            document.documentElement.style.overflow = on ? 'hidden' : '';
+            document.body.style.overflow = on ? 'hidden' : '';
+          } catch (_) {}
+        };
+
+        if (haveLook && notSup) {
+          haveLook.addEventListener('click', () => {
+            // Same behavior as the initial fade overlay: fade out, then remove.
+            notSup.style.opacity = '0';
+            setTimeout(() => {
+              try { notSup.remove(); } catch (_) { notSup.style.display = 'none'; }
+              // Allow scrolling again once the overlay is dismissed.
+              setNoScroll(false);
+            }, 350);
+          });
+        }
+
+        const hasWebBluetooth = ("bluetooth" in navigator);
+        const isSecure = !!window.isSecureContext;
+        if (notSup && (!hasWebBluetooth || !isSecure)) {
+          setNoScroll(true);
+          notSup.style.display = "flex";
+          notSup.style.opacity = "1";
+        }
+      } catch (_) {}
+
+      const ov = document.getElementById("pageFadeOverlay");
+      if (ov) {
+        setTimeout(() => {
+          ov.style.opacity = "0";
+          setTimeout(() => ov.remove(), 1000);
+        }, 350);
+      }
+    });
+  </script>
+  <!-- BLE Manager (unchanged) -->
+  <script src="webble-manager.js"></script>
+
+  <!-- UI logic split -->
+  <script src="ui-control.js"></script>
+  <script src="ui-settings.js"></script>
+  <script src="ui-status.js"></script>
+
+  </div>
+</body>
+</html>
