@@ -9,7 +9,7 @@
 
   // -------------------- Latest firmware check (Info Card) --------------------
   const LATEST_BOARD_FW_URL =
-    'https://raw.githubusercontent.com/kefeizhou/esp32/refs/heads/main/latest_board_firmware.txt';
+    'https://raw.githubusercontent.com/re-spooler/esp32/refs/heads/main/latest_board_firmware.txt';
 
   let latestBoardFw = null;
   let latestBoardFwPromise = null;
